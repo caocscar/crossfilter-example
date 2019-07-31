@@ -3,7 +3,7 @@
 ## What is the Crossfilter Library
 Crossfiltering deals with multidimensional filtering, with many factors involved. It is a purely analytic tool that can give insight in the data provided. For example, it can determine, how many x, given y and z, or which is the most frequent, given x, y, z, and a.
 
-## How to Use the Crossfilter Library with Basic Functions (use fake3.csv as reference)
+## How to Use the Crossfilter Library with Basic Functions (use data.csv as reference)
 ### **Basics**
 Before we start using crossfilter library, we must include it in our HTML file. To add this library, we can write  
 `<script src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter2/1.4.7/crossfilter.min.js"></script>`
@@ -11,13 +11,13 @@ Before we start using crossfilter library, we must include it in our HTML file. 
 To begin crossfiltering of any data set, we have to start with  
 `var cf = crossfilter(data);` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (names of variables are used by convention)
 
-We can check if we are reading in the data correctly. Write `cf.size();` to return the amount of rows that are found in the given dataset (not counting the first row with labels). In this case, it should return `250`.   
+We can check if we are reading in the data correctly. Write `cf.size();` to return the amount of rows that are found in the crossfilter object (not counting the first row with labels). In this case, it should return `250`.
 
 ### **Using and Modifying Dimensions**
 
 We can think of dimensions as "holding" a column or a piece of the data. By writing  
 `var countyDim = cf.dimension(function(d) {return d.county;});`  
-we have `countyDim` essentially "holding" the `county` column of the data found in fake3.csv. 
+we have `countyDim` essentially "holding" the `county` column of the data found in data.csv. 
 
 We can return the highest and lowest values of this dimension. To return an array with the top 3 highest string `county` values, we can write `countyDim.top(3);`. The table given is shown below
 
@@ -37,12 +37,11 @@ We can also return the 3 lowest `county` string by writing `countyDim.bottom(3);
 |---------|---------|-----|--------|------|-----|-----|
 | 1984-01-12 | __Baraga__ | 25-34 | Female | White | -88.35545 | 46.70672 |
 | 1984-01-10 | __Bay__ | 25-34 | Female | White | -83.98172 | 43.68304 |
-| 1984-01-03 | __Bay__ | 45-54 | Male | Balck | -84.91486 | 45.47611 |
+| 1984-01-03 | __Bay__ | 45-54 | Male | Black | -84.91486 | 45.47611 |
 
 __Dimensions can also be further filtered after they've been created__
 
-Imagine for some reason, we only want to see only the counties that start with 'M' or after. We can write `countyDim.filter(function(d) {d > 'M';});` to further filter our dimension. 
-# WHY DOESN'T THIS WORK
+Imagine for some reason, we only want to see only the counties that start with 'M' or after. We can write `countyDim.filter(function(d) {return d > 'M';});` to further filter our dimension. 
 
 > Note that this filtering will apply to all other dimensions and all subsequently created dimensions
 
@@ -54,15 +53,20 @@ while `countyDim.bottom(3);` is now
 
 | Date    | County  | Age | Gender | Race | lng | lat |
 |---------|---------|-----|--------|------|-----|-----|
-| 1984-01-07 | Mason | 25-34 | Male | White | -86.21844 | 43.99430 |
-| 1984-01-07 | Monroe | 55+ | Male | White | -83.53092 | 41.93977 |
-| 1984-01-09 | Montcalm | 45-54 | Male | Black | -85.10792 | 43.28464 |
+| 1984-01-07 | __Mason__ | 25-34 | Male | White | -86.21844 | 43.99430 |
+| 1984-01-07 | __Monroe__ | 55+ | Male | White | -83.53092 | 41.93977 |
+| 1984-01-09 | __Montcalm__ | 45-54 | Male | Black | -85.10792 | 43.28464 |
 
 >Now, the smallest values that can be found in the `countyDim` dimension are only string values greater than 'M'
 
+If one was curious about how many entries exist with a `county` string value that is greater than 'M', we can write: 
+`countyDim.top(Infinity).length;` which gives us `15`. 
+
+>Note the capital __I__ in <b>I</b>nfinity. JavaScript is a case sensitive language. 
+
 The great thing about crossfiltering is that multiple dimensions can be created and compared with each other. We can create another dimension called `latDim` like so:  
 `var latDim = cf.dimension(function(d) {return d.lat;});`  
-This new dimension, `latDim`, represents the lat column of the data found in file fake3.csv. Since lat is full of float values, it is sorted from highest to lowest.
+This new dimension, `latDim`, represents the lat column of the data found in file data.csv. Since lat is full of float values, it is sorted from highest to lowest.
 
 If we want to see the top and bottom of `latDim`, we can call:
 
@@ -85,7 +89,7 @@ and `latDim.bottom(3);` which shows
 We have to remember that the `latDim` dimension is filtered because of the filtering that was applied to `countyDim` earlier. In our newly created `latDim` dimension, there are no rows of data which have a `county` string whose value is less than 'M' (as specified earlier). 
 
 We are also able to further filter our `latDim` dimension. If we want only latitudes greater than 45, we can write  
-`latDim.filter(function(d) {d > 45:});`    
+`latDim.filter(function(d) {return d > 45;});`    
 
 Again, this may have an effect on the top and bottom values of `latDim`. We can check this by rewriting our code into the console:
 
@@ -123,7 +127,8 @@ Both these dimensions are filtered by only having `lat` values that are greater 
 
 Let's say we wanted to see a range of `lat` values, from 44 to 46. We can use the same filter function, but instead, we give it an array of two values, which represent a higher and lower bound like so:  
 `latDim.filter([44, 46]);`  
-> Note we do not need to clear the previous filter applied to `latDim` because a new filter overwrites the last one that was applied to that dimension. In this case, `latDim.filter([44, 46]);` overwrites `latDim.filter(d => d > 45);`.
+> Note we do not need to clear the previous filter applied to `latDim` because a new filter overwrites the last one that was applied to that dimension. In this case, `latDim.filter([44, 46]);` overwrites `latDim.filter(function(d) {return d > 45;});`    
+.
 
 This will only give us `lat` values between 44 and 46 for both dimensions, `latDim` and `countyDim`. We can call our four functions (`latDim.top(3);`, `latDim.bottom(3);`, `countyDim.top(3);` and `countyDim.bottom(3);`) to see how this changes our arrays. 
 
@@ -202,7 +207,7 @@ and `latDim.bottom(3);` is
 ### **Using and Modifying Groups**
 Crossfilter grouping allows us to group data from a particular dimension and use count, average, or sum functions on that given dimension. The main difference is that dimensions are rows of original data while groups are an array of a key-value pair. 
 
-We've decided we want to analyze the `Race` dimension of the fake3.csv file. We first start by creating a dimension that holds the `Race` column.   
+We've decided we want to analyze the `Race` dimension of the data.csv file. We first start by creating a dimension that holds the `Race` column.   
 `var raceDim = cf.dimension(function(d) {return d.Race;});`
 
 Next, we create a group of key-value from that dimension by writing
@@ -216,7 +221,6 @@ Next, we create a group of key-value from that dimension by writing
 | Black | 17 |
 | Hispanic or Latino | 2 |
 | Native Hawaiian or Other Pacific Islander | 2 |
-| Other | 4 |
 | Unknown | 1 |
 | White | 10 |
 
@@ -232,5 +236,22 @@ Similar to dimensions, we can list out the top _n_ values by calling:
 | White | 10 |
 | Asian | 3 |
 
-> Note that since the value column is the column we are comparing, top in this case means the highest two integers that appear in the value column, which is 94 and 89 here. 
+> Note that since the value column is the column we are comparing, top in this case means the highest two integers that appear in the value column, which is 17 (Black) and 10 (White) here. 
 
+Groups in crossfilter are also powerful as we can find statistics based on a certain `Race`, `county`, `Age`, etc. In our case, we have a `Race` dimension and group so we'll use that.
+
+Imagine we wanted to find the sum of the latitudes of each accident of each `Race`. We can do this by using a `reduceSum` function like so:  
+`raceGroup.reduceSum(d => d.lat).all();` This gives us:
+
+| key | value |
+|-----|-------|
+| Asian | 136.30300 |
+| Black | 742.34418 |
+| Hispanic or Latino | 90.50490 |
+| Native Hawaiian or Other Pacific Islander | 88.31314 | 
+| Unknown | 43.53510 | 
+| White | 439.69293 |
+
+> Note that this example is used only demonstrating purposes only and will most likely never be used in real life. It just gives the idea of what `reduceSum` can do with other forms of data. 
+
+Crossfilter documentation can be found here: https://animateddata.co.uk/articles/crossfilter/
