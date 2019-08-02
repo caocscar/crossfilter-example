@@ -11,7 +11,7 @@ Before we start using crossfilter library, we must include it in our HTML file. 
 To begin crossfiltering of any data set, we have to start with  
 `var cf = crossfilter(data);` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (names of variables are used by convention)
 
-We can check if we are reading in the data correctly. Write `cf.size();` to return the amount of rows that are found in the crossfilter object (not counting the first row with labels). In this case, it should return `250`.
+We can check if we are reading in the data correctly. Write `cf.size();` to return the amount of rows that are found in the crossfilter object (not counting the first row with labels). In this case, it should return `35`.
 
 ### **Using and Modifying Dimensions**
 
@@ -204,6 +204,12 @@ and `latDim.bottom(3);` is
 
 > `latDim` is sorting its values without any filters, with `latDim.top(3);` sorting by highest value and `latDim.bottom(3);` sorting by lowest value. 
 
+Occassionally, we will have created too many dimensions and will have to get rid of a few to free up space for new dimensions to be created. We can do this by using the `[Name of Dimension].dispose();`, where the 'Name of Dimension' literal is replaced with the targeted dimension to be deleted. 
+
+If we do `countyDim.dispose();`, we can essentially get rid of further filtering to the `countyDim` dimension. All existing filters will be removed from this dimension, much like a `[Name of Dimension].filterAll();`.
+
+We can still call `countyDim.top(3);` and `countyDim.bottom(3);`, and we get the same values of the table as if it was first created. 
+
 ### **Using and Modifying Groups**
 Crossfilter grouping allows us to group data from a particular dimension and use count, average, or sum functions on that given dimension. The main difference is that dimensions are rows of original data while groups are an array of a key-value pair. 
 
@@ -241,7 +247,7 @@ Similar to dimensions, we can list out the top _n_ values by calling:
 Groups in crossfilter are also powerful as we can find statistics based on a certain `Race`, `county`, `Age`, etc. In our case, we have a `Race` dimension and group so we'll use that.
 
 Imagine we wanted to find the sum of the latitudes of each accident of each `Race`. We can do this by using a `reduceSum` function like so:  
-`raceGroup.reduceSum(d => d.lat).all();` This gives us:
+`raceGroup.reduceSum(function(d) {return d.lat}).all();` This gives us:
 
 | key | value |
 |-----|-------|
@@ -254,4 +260,11 @@ Imagine we wanted to find the sum of the latitudes of each accident of each `Rac
 
 > Note that this example is used only demonstrating purposes only and will most likely never be used in real life. It just gives the idea of what `reduceSum` can do with other forms of data. 
 
-Crossfilter documentation can be found here: https://animateddata.co.uk/articles/crossfilter/
+The same thing can apply for groups when we have created too many groups. We will have to get rid of some to make space for newer groups. We can do this the same way, by writing `[Name of Group].dispose();`, where the 'Name of Group' literal is replaced with the targeted group to be deleted. 
+
+If we do `raceGroup.dispose();`, we can essentially get rid of further filtering to the `raceGroup` group. All existing filters will be removed from this group.
+
+We can still call `raceGroup.top(3);` and `raceGroup.all();`, and we get the same values of the table as if it was first created. 
+
+### **Reference**
+Crossfilter documentation can be found here: https://github.com/crossfilter/crossfilter/wiki/API-Reference
