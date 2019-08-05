@@ -109,6 +109,7 @@ latDim.top(3);
 | 1984-01-08 | __Ottawa__ | 25-34 | Male | Black | -87.84271 | __45.97580__ |
 
 and
+
 ```javascript
 latDim.bottom(3);
 ```
@@ -122,7 +123,8 @@ latDim.bottom(3);
 
 We have to remember that the `latDim` dimension is filtered because of the filtering that was applied to `countyDim` earlier. In our newly created `latDim` dimension, there are no rows of data which have a `county` string whose value is less than 'M' (as specified earlier). 
 
-We are also able to further filter our `latDim` dimension. If we want only latitudes greater than 45, we can write  
+We are also able to further filter our `latDim` dimension. If we want only latitudes greater than 45, we can write
+
 ```javascript
 latDim.filter(function(d) {return d > 45;});
 ```    
@@ -148,16 +150,21 @@ now becomes
 We see that this filter of getting only values of `lat` higher than 45 modifies the `latDim` dimension. However, it has another side effect of modifying the `countyDim` dimension as well. Again, filters applied to one dimension will be applied to all other dimensions as well. 
 
 We can check this by writing 
+
 ```javascript
 countyDim.top(3);
 ```
+
 which shows
+
 | Date    | County  | Age | Gender | Race | lng | lat |
 |---------|---------|-----|--------|------|-----|-----|
 | 1984-01-07 | __Ottawa__ | 45-54 | Female | Asian | -87.84476 | __46.02377__ |
 | 1984-01-04 | __Ottawa__ | 55+ | Male | Asian | -84.54190 | __46.31725__ |
 | 1984-01-08 | __Ottawa__ | 25-34 | Male | Black | -87.84271 | __45.97580__ |
+
 and
+
 ```javascript
 countyDim.bottom(3);
 ```
@@ -172,10 +179,11 @@ which shows
 Both these dimensions are filtered by only having `lat` values that are greater than 45 and `county` values that start past the letter 'M'. Something that is harder to see is that they contain the exact same set of data, but is sorted differently, either by `lat` or `county`. 
 
 Let's say we wanted to see a range of `lat` values, from 44 to 46. We can use the same filter function, but instead, we give it an array of two values, which represent a higher and lower bound like so:  
+
 ```javascript
 latDim.filter([44, 46]);
 ```
-> Note we do not need to clear the previous filter applied to `latDim` because a new filter overwrites the last one that was applied to that dimension. In this case, `latDim.filter([44, 46]);` overwrites `latDim.filter(function(d) {return d > 45;});`
+> Note we do not need to clear the previous filter applied to `latDim` because a new filter overwrites the last one that was applied to that dimension. In this case, `latDim.filter([44, 46]);` overwrites `latDim.filter(function(d) {return d 45;});`
 
 This will only give us `lat` values between 44 and 46 for both dimensions, `latDim` and `countyDim`. We can call our four functions to see how this changes our arrays. 
 
